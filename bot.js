@@ -11,8 +11,9 @@ var T = new Twit(config);
 
 
 // --------------- Retweet #yeg hashtag --------------
-// Choose 1 tweet with media every 30 mins
-var retweetInterval = setInterval(retweetYeg, 1000*60*30);
+// Choose 1 tweet every 20 mins, every 3rd tweet guaranteed media
+var retweetInterval = setInterval(retweetYeg, 1000*60*20);
+var tweetCount = 1;
 
 function retweetYeg() {
   var params = {
@@ -24,8 +25,9 @@ function retweetYeg() {
 
   function gotData(err, data, response) {
     var tweets = data.statuses;
-    for (var i = 0; i < tweets.length; i++) {
-      if (tweets[i].entities.media != undefined) {
+    // If tweetCount is 1 or 2, post first clean tweet
+    if (tweetCount === 1 || tweetCount === 2) {
+      for (var i = 0; i < tweets.length; i++) {
         var retweet = tweets[i].id_str;
         var text = tweets[i].text;
         // Check tweet for foul language
@@ -42,7 +44,33 @@ function retweetYeg() {
           T.post('statuses/retweet/:id', { id: retweet }, function (err, data, response) {
             console.log("Retweeted tweet with id of: " + retweet);
           })
+          tweetCount++;
           break;
+        }
+      }
+    // else if tweetCount is 3, post a tweet with media
+    } else if (tweetCount == 3) {
+      for (var i = 0; i < tweets.length; i++) {
+        if (tweets[i].entities.media != undefined) {
+          var retweet = tweets[i].id_str;
+          var text = tweets[i].text;
+          // Check tweet for foul language
+          var textArray = text.toLowerCase().split(' ');
+          var cleanTweet = true;
+          for (var i = 0; i < textArray.length; i++) {
+            if (badwordsArray.indexOf(textArray[i]) !== -1) {
+              cleanTweet = false;
+              break;
+            }
+          }
+          // If tweet is clean, retweet it
+          if (cleanTweet) {
+            T.post('statuses/retweet/:id', { id: retweet }, function (err, data, response) {
+              console.log("Retweeted tweet with id of: " + retweet);
+            })
+            tweetCount = 1;
+            break;
+          }
         }
       }
     }
@@ -138,8 +166,8 @@ function tweetEvent(eventMsg) {
   // Check if @yegbot tagged in tweet
   var directedAt = false;
   for (var i = 0; i < replyTo.length; i++) {
-    var screenName = replyTo[i].screen_name;
-    if (screenName === 'YegBot') {
+    var screenName = replyTo[i].screen_name.toLowerCase();
+    if (screenName === 'yegbot') {
       directedAt = true;
       break;
     }
