@@ -9,6 +9,11 @@ var config = require('./config');
 
 var T = new Twit(config);
 
+// --------------- Gather some info first --------------
+var blockedIDs = [];
+
+// Get blocked IDs
+getMutedList();
 
 // --------------- Retweet #yeg hashtag --------------
 // Choose 1 tweet every 20 mins, every 3rd tweet guaranteed media
@@ -30,6 +35,8 @@ function retweetYeg() {
       for (var i = 0; i < tweets.length; i++) {
         var retweet = tweets[i].id_str;
         var text = tweets[i].text;
+        var userID = tweets[i].user.id;
+
         // Check tweet for foul language
         var textArray = text.toLowerCase().split(' ');
         var cleanTweet = true;
@@ -39,8 +46,9 @@ function retweetYeg() {
             break;
           }
         }
+
         // If tweet is clean, retweet it
-        if (cleanTweet) {
+        if (cleanTweet && checkIfMuted(blockedIDs, userID)) {
           T.post('statuses/retweet/:id', { id: retweet }, function (err, data, response) {
             console.log("Retweeted tweet with id of: " + retweet);
           })
@@ -54,6 +62,11 @@ function retweetYeg() {
         if (tweets[i].entities.media != undefined) {
           var retweet = tweets[i].id_str;
           var text = tweets[i].text;
+          var userID = tweets[i].user.id;
+
+          // Check if user muted
+          isNotMuted(userID);
+
           // Check tweet for foul language
           var textArray = text.toLowerCase().split(' ');
           var cleanTweet = true;
@@ -63,8 +76,9 @@ function retweetYeg() {
               break;
             }
           }
+
           // If tweet is clean, retweet it
-          if (cleanTweet) {
+          if (cleanTweet && checkIfMuted(blockedIDs, userID)) {
             T.post('statuses/retweet/:id', { id: retweet }, function (err, data, response) {
               console.log("Retweeted tweet with id of: " + retweet);
             })
@@ -150,10 +164,14 @@ stream.on('tweet', tweetEvent);
 
 function tweetEvent(eventMsg) {
   console.log('Tweet entered the stream');
+  //console.log(eventMsg);
   var replyTo = eventMsg.entities.user_mentions;
-  var from = eventMsg.user.screen_name;
+  var from = eventMsg.user.screen_name.toLowerCase();
+  var userID = eventMsg.user.id;
   var tweetID = eventMsg.id_str;
   var text = eventMsg.text;
+
+
   // Check if tweet contains foul language
   var cleanTweet = true;
   var textArray = text.toLowerCase().split(' ');
@@ -163,6 +181,7 @@ function tweetEvent(eventMsg) {
       break;
     }
   }
+
   // Check if @yegbot tagged in tweet
   var directedAt = false;
   for (var i = 0; i < replyTo.length; i++) {
@@ -173,12 +192,37 @@ function tweetEvent(eventMsg) {
     }
   }
 
-  // If both clean and directed at yegbot, retweet it. Else, say no
-  if (cleanTweet && directedAt && from != 'YegBot') {
+  // Check if someone retweeted YegBots own tweet
+  // Might need to add later
+
+  // If both clean, user not blocked & directed at yegbot, retweet it. Else, say no
+  if (cleanTweet && directedAt && from !== 'yegbot' && checkIfMuted(blockedIDs, userID)) {
+    console.log("tweeted");
     T.post('statuses/retweet/:id', { id: tweetID }, function (err, data, response) {
       console.log('Retweeted tagged tweet from ' + from + ' with id of: ' + tweetID);
     })
   } else {
-  console.log('Tweet from ' + from + ' contained foul language and/or not directed at yegbot, not retweeting')
+  console.log('Tweet from ' + from + ' contained foul language, not directed at yegbot, and/or muted, not retweeting')
+  }
+}
+
+
+function getMutedList() {
+  console.log("Getting list");
+  T.get('mutes/users/ids', gotData);
+
+  function gotData(err, data, response) {
+    console.log("List received");
+    blockedIDs = data.ids;
+  }
+}
+
+function checkIfMuted(mutedArray, uID) {
+  if (mutedArray.indexOf(uID) > -1) {
+    console.log("User muted");
+    return false;
+  } else {
+    console.log("User not muted")
+    return true;
   }
 }
