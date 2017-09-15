@@ -64,9 +64,6 @@ function retweetYeg() {
           var text = tweets[i].text;
           var userID = tweets[i].user.id;
 
-          // Check if user muted
-          isNotMuted(userID);
-
           // Check tweet for foul language
           var textArray = text.toLowerCase().split(' ');
           var cleanTweet = true;
