@@ -117,22 +117,22 @@ function tweetWeather() {
 
       if (skytext === 'Sunny' || skytext === 'Clear' || skytext === 'Mostly Sunny' || skytext === 'Partly Sunny') {
         img = `sunny${num}`;
-        tweetText = `☀️☀️ The sun is shining today! Currently ${temp}°C, get out there and enjoy it!`;
+        tweetText = `☀️☀️ The sun is shining today! Currently ${temp}°C, get out there and enjoy it! #yeg #yegbot`;
       } else if (skytext === 'Rain' || skytext === 'Light Rain' || skytext === 'Showers') {
         img = `rain${num}`;
-        tweetText = `Might want to pack an umbrella.☂️ ${temp}°C and calling for rain. 🌧️`;
+        tweetText = `Might want to pack an umbrella.☂️ ${temp}°C and calling for rain. 🌧️ #yeg #yegbot`;
       } else if (skytext === 'Cloudy' || skytext === 'Mostly Cloudy' || skytext === 'Partly Cloudy') {
         img = `cloudy${num}`;
-        tweetText =`${temp}°C and cloudy today. No meatballs though, just clouds. ☁️🌥️`;
+        tweetText =`${temp}°C and cloudy today. No meatballs though, just clouds. ☁️🌥️ #yeg #yegbot`;
       } else if (skytext === 'Snow' || skytext === 'Blizzard') {
         img = `snow${num}`;
-        tweetText = `❄️❄️ Bundle up and grab the shovel! ${temp}°C and snow.`;
+        tweetText = `❄️❄️ Bundle up and grab the shovel! ${temp}°C and snow. #yeg #yegbot`;
       } else if (skytext === 'Thunderstorm' || skytext === 'Scattered Thunderstorms') {
         img = `thunderstorms${num}`;
-        tweetText = `Curl up with a blanket and a movie. ${temp}°C and ⛈️thunderstorms⛈️ today.`;
+        tweetText = `Curl up with a blanket and a movie. ${temp}°C and ⛈️thunderstorms⛈️ today. #yeg #yegbot`;
       } else {
         img = 'default'
-        tweetText = `Looks like ${temp}°C and ${skytext.toLowerCase()} today`;
+        tweetText = `Looks like ${temp}°C and ${skytext.toLowerCase()} today #yeg #yegbot`;
       }
       const imagePath = `img/${img}.gif`;
 
@@ -153,18 +153,17 @@ function tweetWeather() {
 }
 
 
-// --------- Retweet tagged tweet ---------
+// --------- Retweet #yegbot tweet ---------
 
 // Set up user stream
-const stream = T.stream('user');
+const stream = T.stream('statuses/filter', { track: '#yegbot', language: 'en' });
 
-// Anytime someone tags @yegbot
+// Anytime someone hashtag #yegbot
 stream.on('tweet', tweetEvent);
 
 function tweetEvent(eventMsg) {
-  console.log('Tweet entered the stream');
+  console.log('Tweet with #yegbot entered the stream');
   //console.log(eventMsg);
-  const replyTo = eventMsg.entities.user_mentions;
   const from = eventMsg.user.screen_name.toLowerCase();
   const userID = eventMsg.user.id;
   const tweetID = eventMsg.id_str;
@@ -181,33 +180,21 @@ function tweetEvent(eventMsg) {
     }
   }
 
-  // Check if @yegbot tagged in tweet
-  let directedAt = false;
-  for (let i = 0; i < replyTo.length; i++) {
-    const screenName = replyTo[i].screen_name.toLowerCase();
-    if (screenName === 'yegbot') {
-      directedAt = true;
-      break;
-    }
-  }
-
-  // Check if someone retweeted YegBots own tweet
-  // Might need to add later
 
   // If both clean, user not blocked & directed at yegbot, retweet it. Else, say no
-  if (cleanTweet && directedAt && from !== 'yegbot' && checkIfMuted(blockedIDs, userID)) {
+  if (cleanTweet && from !== 'yegbot' && checkIfMuted(blockedIDs, userID)) {
     console.log("tweeted");
-    T.post('statuses/retweet/:id', { id: tweetID }, function (err, data, response) {
+    /*T.post('statuses/retweet/:id', { id: tweetID }, function (err, data, response) {
       console.log(`Retweeted tagged tweet from ${from} with id of: ${tweetID}`);
-    })
+    })*/
   } else {
-  console.log(`Tweet from ${from} contained foul language, not directed at yegbot, and/or muted, not retweeting`);
+  console.log(`Tweet from ${from} contained foul language, from yegbot, and/or muted, not retweeting`);
   }
 }
 
 
 function getMutedList() {
-  console.log("Getting list");
+  console.log("Getting muted users list");
   T.get('mutes/users/ids', gotData);
 
   function gotData(err, data, response) {
