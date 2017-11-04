@@ -124,7 +124,7 @@ function tweetWeather() {
       } else if (skytext === 'Cloudy' || skytext === 'Mostly Cloudy' || skytext === 'Partly Cloudy') {
         img = `cloudy${num}`;
         tweetText =`${temp}°C and cloudy today. No meatballs though, just clouds. ☁️🌥️ #yeg #yegbot`;
-      } else if (skytext === 'Snow' || skytext === 'Blizzard') {
+      } else if (skytext === 'Snow' || skytext === 'Blizzard' || skytext === 'Light Snow') {
         img = `snow${num}`;
         tweetText = `❄️❄️ Bundle up and grab the shovel! ${temp}°C and snow. #yeg #yegbot`;
       } else if (skytext === 'Thunderstorm' || skytext === 'Scattered Thunderstorms') {
