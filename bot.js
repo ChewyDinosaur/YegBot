@@ -118,7 +118,7 @@ function tweetWeather() {
       if (skytext === 'Sunny' || skytext === 'Clear' || skytext === 'Mostly Sunny' || skytext === 'Partly Sunny') {
         img = `sunny${num}`;
         tweetText = `☀️☀️ The sun is shining today! Currently ${temp}°C, get out there and enjoy it! #yeg #yegbot`;
-      } else if (skytext === 'Rain' || skytext === 'Light Rain' || skytext === 'Showers') {
+      } else if (skytext === 'Rain' || skytext === 'Light Rain' || skytext === 'Showers' || skytext === 'Rain Showers') {
         img = `rain${num}`;
         tweetText = `Might want to pack an umbrella.☂️ ${temp}°C and calling for rain. 🌧️ #yeg #yegbot`;
       } else if (skytext === 'Cloudy' || skytext === 'Mostly Cloudy' || skytext === 'Partly Cloudy') {
