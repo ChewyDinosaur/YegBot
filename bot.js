@@ -10,11 +10,10 @@ const config = require('./config');
 const T = new Twit(config);
 
 // --------------- Gather some info first --------------
+// Get blocked IDs
 let blockedIDs = [];
 
-// Get blocked IDs
 getMutedList();
-
 
 // --------------- Retweet #yeg hashtag --------------
 // Choose 1 tweet every 20 mins, every 3rd tweet guaranteed media
@@ -37,24 +36,16 @@ function retweetYeg() {
         const retweet = tweets[i].id_str;
         const text = tweets[i].text;
         const userID = tweets[i].user.id;
-
-        // Check tweet for foul language
         const textArray = text.toLowerCase().split(' ');
-        let cleanTweet = true;
-        for (let i = 0; i < textArray.length; i++) {
-          if (badwordsArray.indexOf(textArray[i]) !== -1) {
-            cleanTweet = false;
-            break;
-          }
-        }
 
-        // If tweet is clean, retweet it
-        if (cleanTweet && checkIfMuted(blockedIDs, userID)) {
+        if (checkIfClean(textArray) && checkIfMuted(blockedIDs, userID)) {
           T.post('statuses/retweet/:id', { id: retweet }, function (err, data, response) {
             console.log(`Retweeted tweet with id of: ${retweet}`);
           })
           tweetCount++;
           break;
+        } else {
+          console.log(`Tweet contains foul language or User ${userID} is muted`);
         }
       }
     // else if tweetCount is 3, post a tweet with media
@@ -64,24 +55,16 @@ function retweetYeg() {
           const retweet = tweets[i].id_str;
           const text = tweets[i].text;
           const userID = tweets[i].user.id;
-
-          // Check tweet for foul language
           const textArray = text.toLowerCase().split(' ');
-          let cleanTweet = true;
-          for (let i = 0; i < textArray.length; i++) {
-            if (badwordsArray.indexOf(textArray[i]) !== -1) {
-              cleanTweet = false;
-              break;
-            }
-          }
 
-          // If tweet is clean, retweet it
-          if (cleanTweet && checkIfMuted(blockedIDs, userID)) {
+          if (checkIfClean(textArray) && checkIfMuted(blockedIDs, userID)) {
             T.post('statuses/retweet/:id', { id: retweet }, function (err, data, response) {
               console.log(`Retweeted tweet with id of: ${retweet}`);
             });
             tweetCount = 1;
             break;
+          } else {
+            console.log(`Tweet contains foul language or User ${userID} is muted`);
           }
         }
       }
@@ -115,7 +98,7 @@ function tweetWeather() {
       let img;
       let tweetText;
 
-      if (skytext === 'Sunny' || skytext === 'Clear' || skytext === 'Mostly Sunny' || skytext === 'Partly Sunny') {
+      if (skytext === 'Sunny' || skytext === 'Clear' || skytext === 'Mostly Sunny' || skytext === 'Partly Sunny' || skytext === 'Mostly Clear') {
         img = `sunny${num}`;
         tweetText = `☀️☀️ The sun is shining today! Currently ${temp}°C, get out there and enjoy it! #yeg #yegbot`;
       } else if (skytext === 'Rain' || skytext === 'Light Rain' || skytext === 'Showers' || skytext === 'Rain Showers') {
@@ -164,31 +147,19 @@ stream.on('tweet', tweetEvent);
 function tweetEvent(eventMsg) {
   console.log('Tweet with #yegbot entered the stream');
   //console.log(eventMsg);
-  const from = eventMsg.user.screen_name.toLowerCase();
+  const accName = eventMsg.user.screen_name.toLowerCase();
   const userID = eventMsg.user.id;
   const tweetID = eventMsg.id_str;
   const text = eventMsg.text;
-
-
-  // Check if tweet contains foul language
-  let cleanTweet = true;
   const textArray = text.toLowerCase().split(' ');
-  for (let i = 0; i < textArray.length; i++) {
-    if (badwordsArray.indexOf(textArray[i]) !== -1) {
-      cleanTweet = false;
-      break;
-    }
-  }
-
 
   // If both clean, user not blocked & directed at yegbot, retweet it. Else, say no
-  if (cleanTweet && from !== 'yegbot' && checkIfMuted(blockedIDs, userID)) {
-    console.log("tweeted");
-    /*T.post('statuses/retweet/:id', { id: tweetID }, function (err, data, response) {
-      console.log(`Retweeted tagged tweet from ${from} with id of: ${tweetID}`);
-    })*/
+  if (checkIfClean(textArray) && accName !== 'yegbot' && checkIfMuted(blockedIDs, userID)) {
+    T.post('statuses/retweet/:id', { id: tweetID }, function (err, data, response) {
+      console.log(`Retweeted tagged tweet from ${accName} with id of: ${tweetID}`);
+    })
   } else {
-  console.log(`Tweet from ${from} contained foul language, from yegbot, and/or muted, not retweeting`);
+    console.log(`Tweet from ${accName} contained foul language, from yegbot, and/or muted, not retweeting`);
   }
 }
 
@@ -212,3 +183,21 @@ function checkIfMuted(mutedArray, uID) {
     return true;
   }
 }
+
+function checkIfClean(txtArr) {
+  for (let i = 0; i < txtArr.length; i++) {
+    if (badwordsArray.indexOf(txtArr[i]) !== -1) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Check tweet for foul language
+// let cleanTweet = true;
+// for (let i = 0; i < textArray.length; i++) {
+//   if (badwordsArray.indexOf(textArray[i]) !== -1) {
+//     cleanTweet = false;
+//     break;
+//   }
+// }
