@@ -98,25 +98,31 @@ function tweetWeather() {
       let img;
       let tweetText;
 
-      if (skytext === 'Sunny' || skytext === 'Clear' || skytext === 'Mostly Sunny' || skytext === 'Partly Sunny' || skytext === 'Mostly Clear') {
-        img = `sunny${num}`;
-        tweetText = `☀️☀️ The sun is shining today! Currently ${temp}°C, get out there and enjoy it! #yeg #yegbot`;
-      } else if (skytext === 'Rain' || skytext === 'Light Rain' || skytext === 'Showers' || skytext === 'Rain Showers') {
-        img = `rain${num}`;
-        tweetText = `Might want to pack an umbrella.☂️ ${temp}°C and calling for rain. 🌧️ #yeg #yegbot`;
-      } else if (skytext === 'Cloudy' || skytext === 'Mostly Cloudy' || skytext === 'Partly Cloudy') {
-        img = `cloudy${num}`;
-        tweetText =`${temp}°C and cloudy today. No meatballs though, just clouds. ☁️🌥️ #yeg #yegbot`;
-      } else if (skytext === 'Snow' || skytext === 'Blizzard' || skytext === 'Light Snow') {
-        img = `snow${num}`;
-        tweetText = `❄️❄️ Bundle up and grab the shovel! ${temp}°C and snow. #yeg #yegbot`;
-      } else if (skytext === 'Thunderstorm' || skytext === 'Scattered Thunderstorms') {
-        img = `thunderstorms${num}`;
-        tweetText = `Curl up with a blanket and a movie. ${temp}°C and ⛈️thunderstorms⛈️ today. #yeg #yegbot`;
+      if (temp <= -20) {
+        img = `cold${num}`;
+        tweetText = `❄️BRRRRR!!❄️ It is ${temp}°C today, stay inside and keep warm! #yeg #yegbot`;
       } else {
-        img = 'default'
-        tweetText = `Looks like ${temp}°C and ${skytext.toLowerCase()} today #yeg #yegbot`;
+        if (skytext === 'Sunny' || skytext === 'Clear' || skytext === 'Mostly Sunny' || skytext === 'Partly Sunny' || skytext === 'Mostly Clear') {
+          img = `sunny${num}`;
+          tweetText = `☀️☀️ The sun is shining today! Currently ${temp}°C, get out there and enjoy it! #yeg #yegbot`;
+        } else if (skytext === 'Rain' || skytext === 'Light Rain' || skytext === 'Showers' || skytext === 'Rain Showers') {
+          img = `rain${num}`;
+          tweetText = `Might want to pack an umbrella.☂️ ${temp}°C and calling for rain. 🌧️ #yeg #yegbot`;
+        } else if (skytext === 'Cloudy' || skytext === 'Mostly Cloudy' || skytext === 'Partly Cloudy') {
+          img = `cloudy${num}`;
+          tweetText =`${temp}°C and cloudy today. No meatballs though, just clouds. ☁️🌥️ #yeg #yegbot`;
+        } else if (skytext === 'Snow' || skytext === 'Blizzard' || skytext === 'Light Snow') {
+          img = `snow${num}`;
+          tweetText = `❄️❄️ Bundle up and grab the shovel! ${temp}°C and snow. #yeg #yegbot`;
+        } else if (skytext === 'Thunderstorm' || skytext === 'Scattered Thunderstorms') {
+          img = `thunderstorms${num}`;
+          tweetText = `Curl up with a blanket and a movie. ${temp}°C and ⛈️thunderstorms⛈️ today. #yeg #yegbot`;
+        } else {
+          img = 'default'
+          tweetText = `Looks like ${temp}°C and ${skytext.toLowerCase()} today #yeg #yegbot`;
+        }
       }
+
       const imagePath = `img/${img}.gif`;
 
       const b64content = fs.readFileSync(imagePath, { encoding: 'base64' })
